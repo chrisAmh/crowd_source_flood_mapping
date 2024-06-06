@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Flood Zones Map</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.Default.css" />
+    <style>
+        #map { height: 600px; }
+        .button-container { margin: 10px 0; }
+        .button-container button { margin-right: 5px; }
+    </style>
+</head>
+<body>
+    <h1>Flood Zones Map</h1>
+    <div class="button-container">
+        <button onclick="location.href='/upload/'">Upload Image</button>
+    </div>
+    <div id="map"></div>
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet.markercluster@1.4.1/dist/leaflet.markercluster.js"></script>
+    <script>
+        var map = L.map('map').setView([0, 0], 2);
+
+        var streets = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 18,
+            attribution: '© OpenStreetMap contributors'
+        }).addTo(map);
+
+        var markers = L.markerClusterGroup();
+        {% for image in images %}
+            var latitude = {{ image.latitude|safe }};
+            var longitude = {{ image.longitude|safe }};
+            var imageUrl = "{{ image.image.url|escapejs }}";
+            var detailUrl = "{% url 'image_detail' image.id %}";
+            var marker = L.marker([latitude, longitude])
+                .bindPopup("<a href='" + detailUrl + "' target='_blank'>View Image</a>");
+            markers.addLayer(marker);
+        {% endfor %}
+        map.addLayer(markers);
+    </script>
+</body>
+</html>
